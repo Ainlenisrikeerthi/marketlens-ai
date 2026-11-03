@@ -1,0 +1,9 @@
+{
+  "framework": "nextjs",
+  "crons": [
+    {
+      "path": "/api/cron/evaluate-alerts",
+      "schedule": "*/5 3-10 * * 1-5"
+    }
+  ]
+}
