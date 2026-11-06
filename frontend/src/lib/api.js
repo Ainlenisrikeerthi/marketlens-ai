@@ -1,10 +1,17 @@
 /**
  * API client helper to interact with Django backend.
+ * All requests are routed through /api (proxied to Django in dev,
+ * or the configured VITE_API_URL in production).
  */
 
-const BASE_URL = '/api';
+const BASE_URL = import.meta.env.VITE_API_URL || '/api';
 
-export async function fetchApi<T>(endpoint: string, options?: RequestInit): Promise<T> {
+/**
+ * @param {string} endpoint
+ * @param {RequestInit} [options]
+ * @returns {Promise<any>}
+ */
+export async function fetchApi(endpoint, options) {
   const url = `${BASE_URL}${endpoint.startsWith('/') ? endpoint : `/${endpoint}`}`;
   const res = await fetch(url, {
     ...options,
@@ -21,3 +28,4 @@ export async function fetchApi<T>(endpoint: string, options?: RequestInit): Prom
 
   return res.json();
 }
+

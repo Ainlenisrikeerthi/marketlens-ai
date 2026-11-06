@@ -12,48 +12,46 @@ import {
   Clock,
   Sparkles,
 } from 'lucide-react';
-import { AlertRule, AlertEvent, Quote, Instrument } from '../types/market';
 import { StatusBadge } from '../components/ui/StatusBadge';
 import { supabase, isSupabaseConfigured } from '../lib/supabase';
 import { fetchApi } from '../lib/api';
-import type { User as SupabaseUser } from '@supabase/supabase-js';
 
 export function AlertsPage() {
-  const [alerts, setAlerts] = useState<AlertRule[]>([]);
-  const [events, setEvents] = useState<AlertEvent[]>([]);
-  const [status, setStatus] = useState<'LIVE' | 'DEMO'>('LIVE');
+  const [alerts, setAlerts] = useState([]);
+  const [events, setEvents] = useState([]);
+  const [status, setStatus] = useState('LIVE');
   const [loading, setLoading] = useState(true);
-  const [user, setUser] = useState<SupabaseUser | null>(null);
-  const [quotes, setQuotes] = useState<Record<string, Quote>>({});
-  const [instruments, setInstruments] = useState<Instrument[]>([]);
+  const [user, setUser] = useState(null);
+  const [quotes, setQuotes] = useState({});
+  const [instruments, setInstruments] = useState([]);
 
   // New alert form
   const [selectedSymbol, setSelectedSymbol] = useState('RELIANCE');
-  const [operator, setOperator] = useState<'GREATER_THAN' | 'LESS_THAN'>('GREATER_THAN');
-  const [threshold, setThreshold] = useState<number>(3100);
+  const [operator, setOperator] = useState('GREATER_THAN');
+  const [threshold, setThreshold] = useState(3100);
   const [submitting, setSubmitting] = useState(false);
   const [evaluating, setEvaluating] = useState(false);
-  const [evalMessage, setEvalMessage] = useState<string | null>(null);
+  const [evalMessage, setEvalMessage] = useState(null);
 
   const fetchAlertsData = async () => {
     try {
       setLoading(true);
       const [alertsData, marketData, instData] = await Promise.all([
-        fetchApi<{ rules?: AlertRule[]; alerts?: AlertRule[]; events?: AlertEvent[]; status?: 'LIVE' | 'DEMO' }>('/alerts/'),
-        fetchApi<{ allTracked?: Quote[] }>('/market/overview/'),
-        fetchApi<Instrument[]>('/instruments/search/'),
+        fetchApi('/alerts/'),
+        fetchApi('/market/overview/'),
+        fetchApi('/instruments/search/'),
       ]);
 
       setAlerts(alertsData.rules || alertsData.alerts || []);
       setEvents(alertsData.events || []);
       setStatus(alertsData.status || 'LIVE');
 
-      const quoteMap: Record<string, Quote> = {};
+      const quoteMap = {};
       for (const q of marketData.allTracked || []) {
         quoteMap[q.symbol] = q;
       }
       setQuotes(quoteMap);
-      setInstruments(instData.filter((i) => !i.isIndex));
+      setInstruments((instData || []).filter((i) => !i.isIndex));
     } catch (err) {
       console.error('Failed to load alerts', err);
     } finally {
@@ -63,8 +61,8 @@ export function AlertsPage() {
 
   useEffect(() => {
     if (isSupabaseConfigured() && supabase) {
-      supabase.auth.getUser().then(({ data: { user } }) => {
-        setUser(user);
+      supabase.auth.getUser().then(({ data: { user: u } }) => {
+        setUser(u);
       });
     }
     fetchAlertsData();
@@ -74,14 +72,15 @@ export function AlertsPage() {
   useEffect(() => {
     const quote = quotes[selectedSymbol];
     if (quote) {
-      const suggested = operator === 'GREATER_THAN'
-        ? Math.ceil(quote.lastPrice * 1.03)
-        : Math.floor(quote.lastPrice * 0.97);
+      const suggested =
+        operator === 'GREATER_THAN'
+          ? Math.ceil(quote.lastPrice * 1.03)
+          : Math.floor(quote.lastPrice * 0.97);
       setThreshold(suggested);
     }
   }, [selectedSymbol, operator, quotes]);
 
-  const handleCreateAlert = async (e: React.FormEvent) => {
+  const handleCreateAlert = async (e) => {
     e.preventDefault();
     const inst = instruments.find((i) => i.symbol === selectedSymbol) || {
       instrumentKey: `NSE_EQ|${selectedSymbol}`,
@@ -108,7 +107,7 @@ export function AlertsPage() {
     }
   };
 
-  const handleToggleAlert = async (id: string, currentEnabled: boolean) => {
+  const handleToggleAlert = async (id, currentEnabled) => {
     try {
       await fetchApi('/alerts/', {
         method: 'PATCH',
@@ -122,7 +121,7 @@ export function AlertsPage() {
     }
   };
 
-  const handleDeleteAlert = async (id: string) => {
+  const handleDeleteAlert = async (id) => {
     try {
       await fetchApi('/alerts/', {
         method: 'DELETE',
@@ -138,7 +137,7 @@ export function AlertsPage() {
     try {
       setEvaluating(true);
       setEvalMessage(null);
-      const data = await fetchApi<{ evaluated: number; triggeredCount: number }>('/alerts/evaluate/', {
+      const data = await fetchApi('/alerts/evaluate/', {
         method: 'POST',
       });
       setEvalMessage(
@@ -160,7 +159,7 @@ export function AlertsPage() {
           <div className="flex items-center gap-3">
             <h1 className="text-2xl font-bold tracking-tight text-white flex items-center gap-2">
               <Bell className="h-6 w-6 text-teal-400" />
-              <span>Price Alerts & Notifications</span>
+              <span>Price Alerts &amp; Notifications</span>
             </h1>
             <StatusBadge status={status} size="md" />
           </div>
@@ -202,7 +201,8 @@ export function AlertsPage() {
             <div>
               <span className="font-semibold text-white">Active Guest Session</span>
               <p className="text-slate-400">
-                Real-time price alerts are active for this browser session. Sign in to sync your alerts and notifications permanently across all devices.
+                Real-time price alerts are active for this browser session. Sign in to sync your alerts
+                and notifications permanently across all devices.
               </p>
             </div>
           </div>
@@ -242,7 +242,7 @@ export function AlertsPage() {
                 <div className="mt-1.5 text-[11px] text-slate-400 flex justify-between font-tabular">
                   <span>Current LTP:</span>
                   <span className="text-white font-semibold">
-                    ₹{quotes[selectedSymbol].lastPrice.toLocaleString('en-IN', { minimumFractionDigits: 2 })}
+                    &#8377;{quotes[selectedSymbol].lastPrice.toLocaleString('en-IN', { minimumFractionDigits: 2 })}
                   </span>
                 </div>
               )}
@@ -252,18 +252,18 @@ export function AlertsPage() {
               <label className="block text-slate-400 font-medium mb-1">Trigger Condition</label>
               <select
                 value={operator}
-                onChange={(e) => setOperator(e.target.value as 'GREATER_THAN' | 'LESS_THAN')}
+                onChange={(e) => setOperator(e.target.value)}
                 className="w-full rounded-lg border border-slate-800 bg-slate-900 px-3 py-2 text-white text-xs focus:border-teal-500 focus:outline-none"
               >
-                <option value="GREATER_THAN">Price rises above (≥)</option>
-                <option value="LESS_THAN">Price drops below (≤)</option>
+                <option value="GREATER_THAN">Price rises above (&#8805;)</option>
+                <option value="LESS_THAN">Price drops below (&#8804;)</option>
               </select>
             </div>
 
             <div>
-              <label className="block text-slate-400 font-medium mb-1">Target Threshold (₹)</label>
+              <label className="block text-slate-400 font-medium mb-1">Target Threshold (&#8377;)</label>
               <div className="relative">
-                <span className="absolute left-3 top-2 text-slate-500 font-bold">₹</span>
+                <span className="absolute left-3 top-2 text-slate-500 font-bold">&#8377;</span>
                 <input
                   type="number"
                   step="0.05"
@@ -360,11 +360,14 @@ export function AlertsPage() {
 
                         <div className="text-xs text-slate-400 flex flex-wrap items-center gap-x-4 gap-y-1 font-tabular">
                           <span>
-                            Target: <strong className="text-white">₹{alert.threshold.toLocaleString('en-IN', { minimumFractionDigits: 2 })}</strong>
+                            Target:{' '}
+                            <strong className="text-white">
+                              &#8377;{alert.threshold.toLocaleString('en-IN', { minimumFractionDigits: 2 })}
+                            </strong>
                           </span>
                           {currentPrice && (
                             <span>
-                              Current: ₹{currentPrice.toLocaleString('en-IN', { minimumFractionDigits: 2 })}{' '}
+                              Current: &#8377;{currentPrice.toLocaleString('en-IN', { minimumFractionDigits: 2 })}{' '}
                               <span className={Number(diffPercent) >= 0 ? 'text-emerald-400' : 'text-rose-400'}>
                                 ({Number(diffPercent) >= 0 ? '+' : ''}{diffPercent}%)
                               </span>
@@ -415,7 +418,8 @@ export function AlertsPage() {
 
             {events.length === 0 ? (
               <div className="rounded-lg border border-dashed border-slate-800 p-6 text-center text-xs text-slate-500">
-                No alert breaches recorded yet. Trigger events will appear here when market prices cross your thresholds.
+                No alert breaches recorded yet. Trigger events will appear here when market prices cross your
+                thresholds.
               </div>
             ) : (
               <div className="space-y-3">
@@ -434,13 +438,18 @@ export function AlertsPage() {
                           <span className="text-[11px] font-normal text-slate-400">breached threshold</span>
                         </div>
                         <div className="text-slate-400 font-tabular mt-0.5">
-                          Observed LTP: <strong className="text-emerald-400">₹{event.observedValue.toFixed(2)}</strong>
+                          Observed LTP:{' '}
+                          <strong className="text-emerald-400">&#8377;{event.observedValue.toFixed(2)}</strong>
                         </div>
                       </div>
                     </div>
 
                     <div className="text-slate-500 text-[11px] font-mono self-end sm:self-auto">
-                      {event.observedAt ? event.observedAt.replace('T', ' ').slice(0, 19) : event.createdAt.slice(0, 19)}
+                      {event.observedAt
+                        ? event.observedAt.replace('T', ' ').slice(0, 19)
+                        : event.createdAt
+                        ? event.createdAt.slice(0, 19)
+                        : ''}
                     </div>
                   </div>
                 ))}
@@ -452,3 +461,4 @@ export function AlertsPage() {
     </div>
   );
 }
+

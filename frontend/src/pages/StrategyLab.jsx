@@ -8,54 +8,14 @@ import {
   RotateCcw,
   ShoppingBag,
 } from 'lucide-react';
-import { BacktestParameters, BacktestResult, Instrument } from '../types/market';
 import { StatusBadge } from '../components/ui/StatusBadge';
 import { fetchApi } from '../lib/api';
 
-export interface PaperHolding {
-  instrumentKey: string;
-  symbol: string;
-  name: string;
-  quantity: number;
-  averageBuyPrice: number;
-  currentPrice: number;
-  currentValue: number;
-  unrealizedPnL: number;
-  unrealizedPnLPercent: number;
-}
-
-export interface PaperTradeRecord {
-  id: string;
-  timestamp: string;
-  instrumentKey: string;
-  symbol: string;
-  side: 'BUY' | 'SELL';
-  quantity: number;
-  price: number;
-  fees: number;
-  total: number;
-  realizedPnL?: number;
-}
-
-export interface PaperPortfolio {
-  id: string;
-  name: string;
-  startingCash: number;
-  cashBalance: number;
-  holdingsValue: number;
-  totalEquity: number;
-  totalRealizedPnL: number;
-  holdings: PaperHolding[];
-  trades: PaperTradeRecord[];
-  lastUpdated: string;
-  disclaimer: string;
-}
-
 export function StrategyLabPage() {
-  const [activeTab, setActiveTab] = useState<'BACKTEST' | 'PAPER_PORTFOLIO'>('BACKTEST');
+  const [activeTab, setActiveTab] = useState('BACKTEST');
 
   // Backtest state
-  const [strategy, setStrategy] = useState<'SMA_CROSSOVER' | 'RSI_THRESHOLD'>('SMA_CROSSOVER');
+  const [strategy, setStrategy] = useState('SMA_CROSSOVER');
   const [symbol, setSymbol] = useState('RELIANCE');
   const [startingCapital, setStartingCapital] = useState(500000);
   const [positionSizePercent, setPositionSizePercent] = useState(100);
@@ -66,32 +26,32 @@ export function StrategyLabPage() {
   const [rsiOversold, setRsiOversold] = useState(35);
   const [rsiOverbought, setRsiOverbought] = useState(65);
 
-  const [instruments, setInstruments] = useState<Instrument[]>([]);
+  const [instruments, setInstruments] = useState([]);
   const [loading, setLoading] = useState(false);
-  const [result, setResult] = useState<BacktestResult | null>(null);
-  const [error, setError] = useState<string | null>(null);
+  const [result, setResult] = useState(null);
+  const [error, setError] = useState(null);
 
   // Paper portfolio state
-  const [portfolio, setPortfolio] = useState<PaperPortfolio | null>(null);
+  const [portfolio, setPortfolio] = useState(null);
   const [orderSymbol, setOrderSymbol] = useState('RELIANCE');
-  const [orderSide, setOrderSide] = useState<'BUY' | 'SELL'>('BUY');
+  const [orderSide, setOrderSide] = useState('BUY');
   const [orderQty, setOrderQty] = useState(10);
   const [orderPrice, setOrderPrice] = useState(2980);
   const [orderLoading, setOrderLoading] = useState(false);
-  const [orderMessage, setOrderMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
+  const [orderMessage, setOrderMessage] = useState(null);
 
   useEffect(() => {
-    fetchApi<Instrument[]>('/instruments/search/')
+    fetchApi('/instruments/search/')
       .then((data) => setInstruments(data.filter((i) => !i.isIndex)))
       .catch(() => {});
   }, []);
 
-  const runBacktest = async (e?: React.FormEvent) => {
+  const runBacktest = async (e) => {
     if (e) e.preventDefault();
     setLoading(true);
     setError(null);
 
-    const payload: BacktestParameters = {
+    const payload = {
       symbol,
       strategy,
       startDate: '2026-08-01',
@@ -107,12 +67,12 @@ export function StrategyLabPage() {
     };
 
     try {
-      const data = await fetchApi<BacktestResult>('/backtests/', {
+      const data = await fetchApi('/backtests/', {
         method: 'POST',
         body: JSON.stringify(payload),
       });
       setResult(data);
-    } catch (err: unknown) {
+    } catch (err) {
       setError(err instanceof Error ? err.message : 'Backtest execution failed');
     } finally {
       setLoading(false);
@@ -121,14 +81,14 @@ export function StrategyLabPage() {
 
   const fetchPortfolio = async () => {
     try {
-      const data = await fetchApi<PaperPortfolio>('/portfolio/');
+      const data = await fetchApi('/portfolio/');
       setPortfolio(data);
     } catch {
       // Ignored
     }
   };
 
-  const executePaperOrder = async (e: React.FormEvent) => {
+  const executePaperOrder = async (e) => {
     e.preventDefault();
     setOrderLoading(true);
     setOrderMessage(null);
@@ -137,12 +97,12 @@ export function StrategyLabPage() {
       instrumentKey: `NSE_EQ|${orderSymbol}`,
       symbol: orderSymbol,
       name: orderSymbol,
-      exchange: 'NSE' as const,
-      currency: 'INR' as const,
+      exchange: 'NSE',
+      currency: 'INR',
     };
 
     try {
-      const json = await fetchApi<{ success: boolean; message: string; portfolio: PaperPortfolio }>('/portfolio/', {
+      const json = await fetchApi('/portfolio/', {
         method: 'POST',
         body: JSON.stringify({
           action: 'ORDER',
@@ -157,7 +117,7 @@ export function StrategyLabPage() {
 
       setPortfolio(json.portfolio);
       setOrderMessage({ type: 'success', text: json.message });
-    } catch (err: unknown) {
+    } catch (err) {
       setOrderMessage({
         type: 'error',
         text: err instanceof Error ? err.message : 'Order execution failed',
@@ -169,12 +129,12 @@ export function StrategyLabPage() {
 
   const resetPortfolio = async () => {
     try {
-      const data = await fetchApi<PaperPortfolio>('/portfolio/', {
+      const data = await fetchApi('/portfolio/', {
         method: 'POST',
         body: JSON.stringify({ action: 'RESET', startingCash: 500000 }),
       });
       setPortfolio(data);
-      setOrderMessage({ type: 'success', text: 'Virtual paper account reset to ₹5,00,000 cash.' });
+      setOrderMessage({ type: 'success', text: 'Virtual paper account reset to \u20b95,00,000 cash.' });
     } catch {
       // Ignore
     }
@@ -193,7 +153,7 @@ export function StrategyLabPage() {
           <div className="flex items-center gap-3">
             <h1 className="text-2xl font-bold tracking-tight text-white flex items-center gap-2">
               <FlaskConical className="h-6 w-6 text-teal-400" />
-              <span>Strategy Lab & Paper Trading</span>
+              <span>Strategy Lab &amp; Paper Trading</span>
             </h1>
             <span className="rounded-full bg-amber-950/80 border border-amber-600/60 px-2.5 py-0.5 text-xs font-semibold text-amber-300">
               SIMULATED — NOT LIVE TRADING
@@ -257,7 +217,7 @@ export function StrategyLabPage() {
                   <label className="block text-slate-400 font-medium mb-1">Strategy Rule</label>
                   <select
                     value={strategy}
-                    onChange={(e) => setStrategy(e.target.value as 'SMA_CROSSOVER' | 'RSI_THRESHOLD')}
+                    onChange={(e) => setStrategy(e.target.value)}
                     className="w-full rounded-lg border border-slate-700 bg-slate-900 p-2.5 text-white focus:border-teal-500 focus:outline-none"
                   >
                     <option value="SMA_CROSSOVER">SMA Crossover (Fast vs Slow)</option>
@@ -340,7 +300,7 @@ export function StrategyLabPage() {
 
                 {/* Capital & Position Sizing */}
                 <div>
-                  <label className="block text-slate-400 font-medium mb-1">Virtual Capital (₹)</label>
+                  <label className="block text-slate-400 font-medium mb-1">Virtual Capital (&#8377;)</label>
                   <input
                     type="number"
                     step="10000"
@@ -432,12 +392,12 @@ export function StrategyLabPage() {
                         {result.metrics.totalReturnPercent.toFixed(2)}%
                       </span>
                       <span className="text-[11px] text-slate-500 block mt-1 font-tabular">
-                        Final: ₹{result.metrics.finalEquity.toLocaleString('en-IN')}
+                        Final: &#8377;{result.metrics.finalEquity.toLocaleString('en-IN')}
                       </span>
                     </div>
 
                     <div className="rounded-xl border border-slate-800 bg-[#0e1424] p-4">
-                      <span className="text-xs text-slate-400 block mb-1">Buy & Hold Benchmark</span>
+                      <span className="text-xs text-slate-400 block mb-1">Buy &amp; Hold Benchmark</span>
                       <span
                         className={`text-xl font-bold font-tabular ${
                           result.benchmark.totalReturnPercent >= 0 ? 'text-emerald-400' : 'text-rose-400'
@@ -447,7 +407,7 @@ export function StrategyLabPage() {
                         {result.benchmark.totalReturnPercent.toFixed(2)}%
                       </span>
                       <span className="text-[11px] text-slate-500 block mt-1 font-tabular">
-                        Final: ₹{result.benchmark.buyAndHoldFinalEquity.toLocaleString('en-IN')}
+                        Final: &#8377;{result.benchmark.buyAndHoldFinalEquity.toLocaleString('en-IN')}
                       </span>
                     </div>
 
@@ -518,14 +478,14 @@ export function StrategyLabPage() {
                                   </span>
                                 </td>
                                 <td className="py-2.5 px-3 text-right font-medium text-white">
-                                  ₹{t.price.toFixed(2)}
+                                  &#8377;{t.price.toFixed(2)}
                                 </td>
                                 <td className="py-2.5 px-3 text-right">{t.quantity}</td>
-                                <td className="py-2.5 px-3 text-right text-slate-400">₹{t.fees.toFixed(2)}</td>
+                                <td className="py-2.5 px-3 text-right text-slate-400">&#8377;{t.fees.toFixed(2)}</td>
                                 <td className="py-2.5 px-3 text-right font-semibold">
                                   {t.netPnl !== undefined ? (
                                     <span className={t.netPnl >= 0 ? 'text-emerald-400' : 'text-rose-400'}>
-                                      {t.netPnl >= 0 ? '+' : ''}₹{t.netPnl.toFixed(2)}
+                                      {t.netPnl >= 0 ? '+' : ''}&#8377;{t.netPnl.toFixed(2)}
                                     </span>
                                   ) : (
                                     <span className="text-slate-500">—</span>
@@ -554,7 +514,7 @@ export function StrategyLabPage() {
             <div className="rounded-xl border border-slate-800 bg-[#0e1424] p-5">
               <span className="text-xs text-slate-400 block mb-1">Total Account Equity</span>
               <span className="text-2xl font-bold text-white font-tabular">
-                ₹{portfolio?.totalEquity.toLocaleString('en-IN', { minimumFractionDigits: 2 }) || '5,00,000.00'}
+                &#8377;{portfolio?.totalEquity.toLocaleString('en-IN', { minimumFractionDigits: 2 }) || '5,00,000.00'}
               </span>
               <span className="text-[11px] text-slate-500 block mt-1 font-mono">
                 Cash + Holdings Market Value
@@ -566,7 +526,7 @@ export function StrategyLabPage() {
                 <span className="text-xs text-slate-400">Available Virtual Cash</span>
                 <button
                   onClick={resetPortfolio}
-                  title="Reset virtual cash to ₹5,00,000"
+                  title="Reset virtual cash to &#8377;5,00,000"
                   className="flex items-center gap-1 text-[10px] text-teal-400 hover:text-teal-300 cursor-pointer"
                 >
                   <RotateCcw className="h-3 w-3" />
@@ -574,7 +534,7 @@ export function StrategyLabPage() {
                 </button>
               </div>
               <span className="text-2xl font-bold text-teal-400 font-tabular">
-                ₹{portfolio?.cashBalance.toLocaleString('en-IN', { minimumFractionDigits: 2 }) || '5,00,000.00'}
+                &#8377;{portfolio?.cashBalance.toLocaleString('en-IN', { minimumFractionDigits: 2 }) || '5,00,000.00'}
               </span>
               <span className="text-[11px] text-slate-500 block mt-1">Ready for simulated allocation</span>
             </div>
@@ -582,7 +542,7 @@ export function StrategyLabPage() {
             <div className="rounded-xl border border-slate-800 bg-[#0e1424] p-5">
               <span className="text-xs text-slate-400 block mb-1">Holdings Market Value</span>
               <span className="text-2xl font-bold text-white font-tabular">
-                ₹{portfolio?.holdingsValue.toLocaleString('en-IN', { minimumFractionDigits: 2 }) || '0.00'}
+                &#8377;{portfolio?.holdingsValue.toLocaleString('en-IN', { minimumFractionDigits: 2 }) || '0.00'}
               </span>
               <span className="text-[11px] text-slate-500 block mt-1">
                 {portfolio?.holdings.length || 0} Open Positions
@@ -590,14 +550,14 @@ export function StrategyLabPage() {
             </div>
 
             <div className="rounded-xl border border-slate-800 bg-[#0e1424] p-5">
-              <span className="text-xs text-slate-400 block mb-1">Realized Net P&L</span>
+              <span className="text-xs text-slate-400 block mb-1">Realized Net P&amp;L</span>
               <span
                 className={`text-2xl font-bold font-tabular ${
                   (portfolio?.totalRealizedPnL || 0) >= 0 ? 'text-emerald-400' : 'text-rose-400'
                 }`}
               >
                 {(portfolio?.totalRealizedPnL || 0) >= 0 ? '+' : ''}
-                ₹{portfolio?.totalRealizedPnL.toLocaleString('en-IN', { minimumFractionDigits: 2 }) || '0.00'}
+                &#8377;{portfolio?.totalRealizedPnL.toLocaleString('en-IN', { minimumFractionDigits: 2 }) || '0.00'}
               </span>
               <span className="text-[11px] text-slate-500 block mt-1 font-mono">
                 From closed paper trades
@@ -696,7 +656,7 @@ export function StrategyLabPage() {
                   </div>
 
                   <div>
-                    <label className="block text-slate-400 font-medium mb-1">Simulated Price (₹)</label>
+                    <label className="block text-slate-400 font-medium mb-1">Simulated Price (&#8377;)</label>
                     <input
                       type="number"
                       min="1"
@@ -712,16 +672,16 @@ export function StrategyLabPage() {
                 <div className="rounded-lg bg-slate-900/60 border border-slate-800 p-3 space-y-1.5 text-[11px] text-slate-400">
                   <div className="flex justify-between">
                     <span>Gross Value:</span>
-                    <span className="font-tabular text-white">₹{(orderQty * orderPrice).toLocaleString('en-IN', { minimumFractionDigits: 2 })}</span>
+                    <span className="font-tabular text-white">&#8377;{(orderQty * orderPrice).toLocaleString('en-IN', { minimumFractionDigits: 2 })}</span>
                   </div>
                   <div className="flex justify-between">
                     <span>Est. Fees (0.10%):</span>
-                    <span className="font-tabular text-slate-300">₹{((orderQty * orderPrice) * 0.001).toFixed(2)}</span>
+                    <span className="font-tabular text-slate-300">&#8377;{((orderQty * orderPrice) * 0.001).toFixed(2)}</span>
                   </div>
                   <div className="flex justify-between border-t border-slate-800 pt-1 font-semibold">
                     <span className="text-white">Estimated {orderSide === 'BUY' ? 'Total Outlay' : 'Net Proceeds'}:</span>
                     <span className="font-tabular text-teal-400">
-                      ₹{orderSide === 'BUY'
+                      &#8377;{orderSide === 'BUY'
                         ? ((orderQty * orderPrice) * 1.001).toLocaleString('en-IN', { minimumFractionDigits: 2 })
                         : ((orderQty * orderPrice) * 0.999).toLocaleString('en-IN', { minimumFractionDigits: 2 })}
                     </span>
@@ -771,7 +731,7 @@ export function StrategyLabPage() {
                           <th className="py-2.5 px-3 text-right">Avg Price</th>
                           <th className="py-2.5 px-3 text-right">Market Price</th>
                           <th className="py-2.5 px-3 text-right">Current Value</th>
-                          <th className="py-2.5 px-3 text-right">Unrealized P&L</th>
+                          <th className="py-2.5 px-3 text-right">Unrealized P&amp;L</th>
                         </tr>
                       </thead>
                       <tbody className="divide-y divide-slate-800/60 font-tabular text-slate-300">
@@ -782,12 +742,12 @@ export function StrategyLabPage() {
                               <span className="text-[10px] text-slate-500">{h.name}</span>
                             </td>
                             <td className="py-2.5 px-3 text-right font-medium text-white">{h.quantity}</td>
-                            <td className="py-2.5 px-3 text-right">₹{h.averageBuyPrice.toFixed(2)}</td>
-                            <td className="py-2.5 px-3 text-right font-semibold text-white">₹{h.currentPrice.toFixed(2)}</td>
-                            <td className="py-2.5 px-3 text-right font-bold text-white">₹{h.currentValue.toLocaleString('en-IN')}</td>
+                            <td className="py-2.5 px-3 text-right">&#8377;{h.averageBuyPrice.toFixed(2)}</td>
+                            <td className="py-2.5 px-3 text-right font-semibold text-white">&#8377;{h.currentPrice.toFixed(2)}</td>
+                            <td className="py-2.5 px-3 text-right font-bold text-white">&#8377;{h.currentValue.toLocaleString('en-IN')}</td>
                             <td className="py-2.5 px-3 text-right font-semibold">
                               <span className={h.unrealizedPnL >= 0 ? 'text-emerald-400' : 'text-rose-400'}>
-                                {h.unrealizedPnL >= 0 ? '+' : ''}₹{h.unrealizedPnL.toFixed(2)} ({h.unrealizedPnL >= 0 ? '+' : ''}{h.unrealizedPnLPercent.toFixed(2)}%)
+                                {h.unrealizedPnL >= 0 ? '+' : ''}&#8377;{h.unrealizedPnL.toFixed(2)} ({h.unrealizedPnL >= 0 ? '+' : ''}{h.unrealizedPnLPercent.toFixed(2)}%)
                               </span>
                             </td>
                           </tr>
@@ -820,7 +780,7 @@ export function StrategyLabPage() {
                           <th className="py-2 px-3 text-right">Qty</th>
                           <th className="py-2 px-3 text-right">Price</th>
                           <th className="py-2 px-3 text-right">Fees</th>
-                          <th className="py-2 px-3 text-right">Realized P&L</th>
+                          <th className="py-2 px-3 text-right">Realized P&amp;L</th>
                         </tr>
                       </thead>
                       <tbody className="divide-y divide-slate-800/60 font-tabular text-slate-300">
@@ -840,12 +800,12 @@ export function StrategyLabPage() {
                             </td>
                             <td className="py-2 px-3 font-bold text-white">{t.symbol}</td>
                             <td className="py-2 px-3 text-right">{t.quantity}</td>
-                            <td className="py-2 px-3 text-right">₹{t.price.toFixed(2)}</td>
-                            <td className="py-2 px-3 text-right text-slate-400">₹{t.fees.toFixed(2)}</td>
+                            <td className="py-2 px-3 text-right">&#8377;{t.price.toFixed(2)}</td>
+                            <td className="py-2 px-3 text-right text-slate-400">&#8377;{t.fees.toFixed(2)}</td>
                             <td className="py-2 px-3 text-right font-semibold">
                               {t.realizedPnL !== undefined ? (
                                 <span className={t.realizedPnL >= 0 ? 'text-emerald-400' : 'text-rose-400'}>
-                                  {t.realizedPnL >= 0 ? '+' : ''}₹{t.realizedPnL.toFixed(2)}
+                                  {t.realizedPnL >= 0 ? '+' : ''}&#8377;{t.realizedPnL.toFixed(2)}
                                 </span>
                               ) : (
                                 <span className="text-slate-500">—</span>
@@ -865,3 +825,4 @@ export function StrategyLabPage() {
     </div>
   );
 }
+

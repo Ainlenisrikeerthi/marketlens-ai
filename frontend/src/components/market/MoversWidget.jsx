@@ -1,15 +1,9 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { ArrowUpRight, ArrowDownRight, TrendingUp, TrendingDown, Info } from 'lucide-react';
-import { Quote } from '../../types/market';
 
-interface MoversWidgetProps {
-  topGainers: Quote[];
-  topLosers: Quote[];
-}
-
-export function MoversWidget({ topGainers, topLosers }: MoversWidgetProps) {
-  const [activeTab, setActiveTab] = useState<'gainers' | 'losers'>('gainers');
+export function MoversWidget({ topGainers, topLosers }) {
+  const [activeTab, setActiveTab] = useState('gainers');
   const items = activeTab === 'gainers' ? topGainers : topLosers;
 
   return (
@@ -76,7 +70,7 @@ export function MoversWidget({ topGainers, topLosers }: MoversWidgetProps) {
 
               <div className="text-right">
                 <div className="text-sm font-semibold text-white font-tabular">
-                  ₹{quote.lastPrice.toLocaleString('en-IN', { minimumFractionDigits: 2 })}
+                  &#8377;{quote.lastPrice.toLocaleString('en-IN', { minimumFractionDigits: 2 })}
                 </div>
                 <div
                   className={`flex items-center justify-end gap-1 text-xs font-medium font-tabular ${
@@ -98,3 +92,4 @@ export function MoversWidget({ topGainers, topLosers }: MoversWidgetProps) {
     </div>
   );
 }
+

@@ -9,35 +9,34 @@ import {
   Clock,
   RefreshCw,
 } from 'lucide-react';
-import { Quote, AlertRule, AlertEvent, Instrument } from '../types/market';
 import { StatusBadge } from '../components/ui/StatusBadge';
 import { fetchApi } from '../lib/api';
 
 export function WatchlistPage() {
-  const [watchlistQuotes, setWatchlistQuotes] = useState<Quote[]>([]);
-  const [alerts, setAlerts] = useState<AlertRule[]>([]);
-  const [events, setEvents] = useState<AlertEvent[]>([]);
-  const [instruments, setInstruments] = useState<Instrument[]>([]);
+  const [watchlistQuotes, setWatchlistQuotes] = useState([]);
+  const [alerts, setAlerts] = useState([]);
+  const [events, setEvents] = useState([]);
+  const [instruments, setInstruments] = useState([]);
 
   // New alert form state
   const [selectedSymbol, setSelectedSymbol] = useState('RELIANCE');
-  const [operator, setOperator] = useState<'GREATER_THAN' | 'LESS_THAN'>('GREATER_THAN');
-  const [threshold, setThreshold] = useState<number>(3100);
+  const [operator, setOperator] = useState('GREATER_THAN');
+  const [threshold, setThreshold] = useState(3100);
 
   // AI Briefing State
   const [generatingBriefing, setGeneratingBriefing] = useState(false);
-  const [briefingText, setBriefingText] = useState<string | null>(null);
+  const [briefingText, setBriefingText] = useState(null);
 
   const fetchWatchlistAndAlerts = async () => {
     try {
       const [wData, aData, instData] = await Promise.all([
-        fetchApi<any>('/watchlists/'),
-        fetchApi<{ rules?: AlertRule[]; alerts?: AlertRule[]; events?: AlertEvent[] }>('/alerts/'),
-        fetchApi<Instrument[]>('/instruments/search/'),
+        fetchApi('/watchlists/'),
+        fetchApi('/alerts/'),
+        fetchApi('/instruments/search/'),
       ]);
 
       if (Array.isArray(wData) && wData[0]?.items) {
-        const quotes = wData[0].items.map((it: any) => it.quote).filter(Boolean);
+        const quotes = wData[0].items.map((it) => it.quote).filter(Boolean);
         setWatchlistQuotes(quotes);
       } else if (wData?.quotes) {
         setWatchlistQuotes(wData.quotes);
@@ -45,7 +44,7 @@ export function WatchlistPage() {
 
       setAlerts(aData.rules || aData.alerts || []);
       setEvents(aData.events || []);
-      setInstruments(instData.filter((i) => !i.isIndex));
+      setInstruments((instData || []).filter((i) => !i.isIndex));
     } catch (err) {
       console.error(err);
     }
@@ -55,7 +54,7 @@ export function WatchlistPage() {
     fetchWatchlistAndAlerts();
   }, []);
 
-  const handleCreateAlert = async (e: React.FormEvent) => {
+  const handleCreateAlert = async (e) => {
     e.preventDefault();
     const inst = instruments.find((i) => i.symbol === selectedSymbol);
     if (!inst) return;
@@ -77,7 +76,7 @@ export function WatchlistPage() {
     }
   };
 
-  const handleToggleAlert = async (id: string, currentEnabled: boolean) => {
+  const handleToggleAlert = async (id, currentEnabled) => {
     try {
       await fetchApi('/alerts/', {
         method: 'PATCH',
@@ -108,7 +107,7 @@ export function WatchlistPage() {
           <div className="flex items-center gap-3">
             <h1 className="text-2xl font-bold tracking-tight text-white flex items-center gap-2">
               <Bookmark className="h-6 w-6 text-teal-400" />
-              <span>Watchlist & Threshold Alerts</span>
+              <span>Watchlist &amp; Threshold Alerts</span>
             </h1>
             <StatusBadge status="LIVE" size="md" />
           </div>
@@ -139,7 +138,7 @@ export function WatchlistPage() {
               <Sparkles className="h-4 w-4 text-teal-400" />
               <span>On-Demand AI Watchlist Briefing</span>
             </h3>
-            <span className="text-[10px] text-slate-400 font-mono">Synthesized from Quotes & News Metadata</span>
+            <span className="text-[10px] text-slate-400 font-mono">Synthesized from Quotes &amp; News Metadata</span>
           </div>
           <p className="text-xs text-slate-200 leading-relaxed">{briefingText}</p>
         </div>
@@ -169,39 +168,47 @@ export function WatchlistPage() {
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-800/60 text-slate-300">
-                {watchlistQuotes.map((stock) => {
-                  const isPositive = stock.change >= 0;
-                  return (
-                    <tr key={stock.instrumentKey} className="hover:bg-slate-800/30">
-                      <td className="py-3 px-4">
-                        <div className="font-semibold text-white">{stock.symbol}</div>
-                        <div className="text-[11px] text-slate-400 truncate max-w-[160px]">{stock.name}</div>
-                      </td>
-                      <td className="py-3 px-4 text-right font-semibold font-tabular text-white">
-                        ₹{stock.lastPrice.toLocaleString('en-IN', { minimumFractionDigits: 2 })}
-                      </td>
-                      <td className="py-3 px-4 text-right font-medium font-tabular">
-                        <span className={isPositive ? 'text-emerald-400' : 'text-rose-400'}>
-                          {isPositive ? '+' : ''}
-                          {stock.change.toFixed(2)} ({isPositive ? '+' : ''}
-                          {stock.changePercent.toFixed(2)}%)
-                        </span>
-                      </td>
-                      <td className="py-3 px-4 text-right text-slate-400 font-tabular text-[11px]">
-                        ₹{stock.high} / ₹{stock.low}
-                      </td>
-                      <td className="py-3 px-4 text-right">
-                        <Link
-                          to={`/stocks/${encodeURIComponent(stock.instrumentKey)}`}
-                          className="inline-flex items-center gap-1 text-teal-400 hover:text-teal-300 text-[11px] font-medium"
-                        >
-                          <span>Analyze</span>
-                          <ArrowUpRight className="h-3 w-3" />
-                        </Link>
-                      </td>
-                    </tr>
-                  );
-                })}
+                {watchlistQuotes.length === 0 ? (
+                  <tr>
+                    <td colSpan={5} className="py-10 text-center text-slate-500">
+                      No stocks in your watchlist yet. Add stocks from the Stock Research page.
+                    </td>
+                  </tr>
+                ) : (
+                  watchlistQuotes.map((stock) => {
+                    const isPositive = stock.change >= 0;
+                    return (
+                      <tr key={stock.instrumentKey} className="hover:bg-slate-800/30">
+                        <td className="py-3 px-4">
+                          <div className="font-semibold text-white">{stock.symbol}</div>
+                          <div className="text-[11px] text-slate-400 truncate max-w-[160px]">{stock.name}</div>
+                        </td>
+                        <td className="py-3 px-4 text-right font-semibold font-tabular text-white">
+                          &#8377;{stock.lastPrice.toLocaleString('en-IN', { minimumFractionDigits: 2 })}
+                        </td>
+                        <td className="py-3 px-4 text-right font-medium font-tabular">
+                          <span className={isPositive ? 'text-emerald-400' : 'text-rose-400'}>
+                            {isPositive ? '+' : ''}
+                            {stock.change.toFixed(2)} ({isPositive ? '+' : ''}
+                            {stock.changePercent.toFixed(2)}%)
+                          </span>
+                        </td>
+                        <td className="py-3 px-4 text-right text-slate-400 font-tabular text-[11px]">
+                          &#8377;{stock.high} / &#8377;{stock.low}
+                        </td>
+                        <td className="py-3 px-4 text-right">
+                          <Link
+                            to={`/stocks/${encodeURIComponent(stock.instrumentKey)}`}
+                            className="inline-flex items-center gap-1 text-teal-400 hover:text-teal-300 text-[11px] font-medium"
+                          >
+                            <span>Analyze</span>
+                            <ArrowUpRight className="h-3 w-3" />
+                          </Link>
+                        </td>
+                      </tr>
+                    );
+                  })
+                )}
               </tbody>
             </table>
           </div>
@@ -236,7 +243,7 @@ export function WatchlistPage() {
                 <label className="block text-slate-400 mb-1">Trigger Condition</label>
                 <select
                   value={operator}
-                  onChange={(e) => setOperator(e.target.value as 'GREATER_THAN' | 'LESS_THAN')}
+                  onChange={(e) => setOperator(e.target.value)}
                   className="w-full rounded-lg border border-slate-700 bg-slate-900 p-2 text-white"
                 >
                   <option value="GREATER_THAN">Price Greater Than (&gt;=)</option>
@@ -245,7 +252,7 @@ export function WatchlistPage() {
               </div>
 
               <div>
-                <label className="block text-slate-400 mb-1">Threshold Value (₹)</label>
+                <label className="block text-slate-400 mb-1">Threshold Value (&#8377;)</label>
                 <input
                   type="number"
                   step={0.5}
@@ -273,30 +280,34 @@ export function WatchlistPage() {
             </h3>
 
             <div className="space-y-2">
-              {alerts.map((al) => (
-                <div
-                  key={al.id}
-                  className="flex items-center justify-between p-2.5 rounded-lg border border-slate-800 bg-slate-900/60 text-xs"
-                >
-                  <div>
-                    <span className="font-semibold text-white">{al.symbol}</span>
-                    <span className="text-slate-400 ml-1">
-                      {al.operator === 'GREATER_THAN' ? '≥' : '≤'} ₹{al.threshold}
-                    </span>
-                  </div>
-
-                  <button
-                    onClick={() => handleToggleAlert(al.id, al.enabled)}
-                    className={`px-2 py-0.5 rounded text-[10px] font-medium transition cursor-pointer ${
-                      al.enabled
-                        ? 'bg-emerald-950/80 text-emerald-300 border border-emerald-800'
-                        : 'bg-slate-800 text-slate-500 border border-slate-700'
-                    }`}
+              {alerts.length === 0 ? (
+                <p className="text-xs text-slate-500 text-center py-4">No alerts configured yet.</p>
+              ) : (
+                alerts.map((al) => (
+                  <div
+                    key={al.id}
+                    className="flex items-center justify-between p-2.5 rounded-lg border border-slate-800 bg-slate-900/60 text-xs"
                   >
-                    {al.enabled ? 'Active' : 'Muted'}
-                  </button>
-                </div>
-              ))}
+                    <div>
+                      <span className="font-semibold text-white">{al.symbol}</span>
+                      <span className="text-slate-400 ml-1">
+                        {al.operator === 'GREATER_THAN' ? '≥' : '≤'} &#8377;{al.threshold}
+                      </span>
+                    </div>
+
+                    <button
+                      onClick={() => handleToggleAlert(al.id, al.enabled)}
+                      className={`px-2 py-0.5 rounded text-[10px] font-medium transition cursor-pointer ${
+                        al.enabled
+                          ? 'bg-emerald-950/80 text-emerald-300 border border-emerald-800'
+                          : 'bg-slate-800 text-slate-500 border border-slate-700'
+                      }`}
+                    >
+                      {al.enabled ? 'Active' : 'Muted'}
+                    </button>
+                  </div>
+                ))
+              )}
             </div>
           </div>
 
@@ -308,22 +319,28 @@ export function WatchlistPage() {
             </h3>
 
             <div className="space-y-2">
-              {events.map((ev) => (
-                <div
-                  key={ev.id}
-                  className="p-2.5 rounded-lg border border-teal-950 bg-teal-950/20 text-xs space-y-1"
-                >
-                  <div className="flex items-center justify-between">
-                    <span className="font-semibold text-teal-300">{ev.symbol} Breached</span>
-                    <span className="text-[10px] text-slate-500 font-mono">
-                      {ev.observedAt.includes('T') ? ev.observedAt.split('T')[1].slice(0, 5) : ev.observedAt} IST
-                    </span>
+              {events.length === 0 ? (
+                <p className="text-xs text-slate-500 text-center py-4">No alert events recorded yet.</p>
+              ) : (
+                events.map((ev) => (
+                  <div
+                    key={ev.id}
+                    className="p-2.5 rounded-lg border border-teal-950 bg-teal-950/20 text-xs space-y-1"
+                  >
+                    <div className="flex items-center justify-between">
+                      <span className="font-semibold text-teal-300">{ev.symbol} Breached</span>
+                      <span className="text-[10px] text-slate-500 font-mono">
+                        {ev.observedAt && ev.observedAt.includes('T')
+                          ? ev.observedAt.split('T')[1].slice(0, 5)
+                          : ev.observedAt} IST
+                      </span>
+                    </div>
+                    <p className="text-[11px] text-slate-300">
+                      Observed market price: &#8377;{ev.observedValue.toFixed(2)}
+                    </p>
                   </div>
-                  <p className="text-[11px] text-slate-300">
-                    Observed market price: ₹{ev.observedValue.toFixed(2)}
-                  </p>
-                </div>
-              ))}
+                ))
+              )}
             </div>
           </div>
         </div>
@@ -331,3 +348,4 @@ export function WatchlistPage() {
     </div>
   );
 }
+

@@ -10,16 +10,15 @@ import {
   CheckCircle2,
   Lock,
 } from 'lucide-react';
-import { MarketOverview } from '../types/market';
 import { StatusBadge } from '../components/ui/StatusBadge';
 import { fetchApi } from '../lib/api';
 
 export function LandingPage() {
-  const [overview, setOverview] = useState<MarketOverview | null>(null);
+  const [overview, setOverview] = useState(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    fetchApi<MarketOverview>('/market/overview/')
+    fetchApi('/market/overview/')
       .then((data) => {
         setOverview(data);
         setLoading(false);
@@ -84,7 +83,7 @@ export function LandingPage() {
             </span>
             <span className="flex items-center gap-1.5">
               <CheckCircle2 className="h-3.5 w-3.5 text-teal-400" />
-              Live & Real-Time Market Data Architecture
+              Live &amp; Real-Time Market Data Architecture
             </span>
           </div>
         </div>
@@ -120,7 +119,7 @@ export function LandingPage() {
                   <div>
                     <span className="text-xs font-medium text-slate-400 block">{idx.name}</span>
                     <span className="text-lg font-bold text-white font-tabular">
-                      ₹{idx.lastPrice.toLocaleString('en-IN', { minimumFractionDigits: 2 })}
+                      &#8377;{idx.lastPrice.toLocaleString('en-IN', { minimumFractionDigits: 2 })}
                     </span>
                   </div>
                   <div
@@ -175,7 +174,7 @@ export function LandingPage() {
               </div>
               <h3 className="text-base font-semibold text-white mb-2">Grounded AI Analysis</h3>
               <p className="text-xs text-slate-400 leading-relaxed">
-                Claude synthesizes verified technical observations, risks, and uncertainties strictly from supplied data contracts with source attributions.
+                Gemini synthesizes verified technical observations, risks, and uncertainties strictly from supplied data contracts with source attributions.
               </p>
             </div>
 
@@ -203,7 +202,7 @@ export function LandingPage() {
               <div className="h-10 w-10 rounded-lg bg-indigo-500/10 border border-indigo-500/30 text-indigo-400 flex items-center justify-center mb-4">
                 <Lock className="h-5 w-5" />
               </div>
-              <h3 className="text-base font-semibold text-white mb-2">Watchlists & Alerts</h3>
+              <h3 className="text-base font-semibold text-white mb-2">Watchlists &amp; Alerts</h3>
               <p className="text-xs text-slate-400 leading-relaxed">
                 Organize tracked instruments, configure price thresholds, and view persisted triggering events in an isolated user workspace.
               </p>
@@ -213,7 +212,7 @@ export function LandingPage() {
               <div className="h-10 w-10 rounded-lg bg-rose-500/10 border border-rose-500/30 text-rose-400 flex items-center justify-center mb-4">
                 <ShieldCheck className="h-5 w-5" />
               </div>
-              <h3 className="text-base font-semibold text-white mb-2">SEBI Guardrails & Safety</h3>
+              <h3 className="text-base font-semibold text-white mb-2">SEBI Guardrails &amp; Safety</h3>
               <p className="text-xs text-slate-400 leading-relaxed">
                 Strict boundaries against real-money execution, automated trading, or unregistered advisory promises. Built solely for education.
               </p>
@@ -224,3 +223,4 @@ export function LandingPage() {
     </div>
   );
 }
+

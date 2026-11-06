@@ -3,19 +3,12 @@ import {
   Building2,
   Info,
 } from 'lucide-react';
-import { CompanyFundamentals } from '../../types/market';
-
-interface CompanyFundamentalsCardProps {
-  fundamentals: CompanyFundamentals;
-  symbol: string;
-  currentPrice: number;
-}
 
 export function CompanyFundamentalsCard({
   fundamentals,
   symbol,
   currentPrice,
-}: CompanyFundamentalsCardProps) {
+}) {
   // 52-Week Range calculation
   const rangeSpan = fundamentals.yearHigh - fundamentals.yearLow;
   const currentOffset = Math.max(0, currentPrice - fundamentals.yearLow);
@@ -37,7 +30,7 @@ export function CompanyFundamentalsCard({
           </div>
           <div>
             <h3 className="text-base font-bold text-white flex items-center gap-2">
-              <span>Company Fundamentals & Key Ratios</span>
+              <span>Company Fundamentals &amp; Key Ratios</span>
               <span className="rounded bg-slate-800 px-2 py-0.5 text-[10px] font-mono text-teal-400">
                 {fundamentals.sector}
               </span>
@@ -58,7 +51,7 @@ export function CompanyFundamentalsCard({
         <div className="flex justify-between items-center text-xs text-slate-400">
           <span className="font-semibold text-slate-300">52-Week Trading Range</span>
           <span className="font-tabular font-semibold text-teal-400">
-            Current LTP: ₹{currentPrice.toLocaleString('en-IN', { minimumFractionDigits: 2 })}
+            Current LTP: &#8377;{currentPrice.toLocaleString('en-IN', { minimumFractionDigits: 2 })}
           </span>
         </div>
 
@@ -73,9 +66,9 @@ export function CompanyFundamentalsCard({
         </div>
 
         <div className="flex justify-between items-center text-[11px] text-slate-400 font-tabular">
-          <span>52W Low: <strong className="text-white">₹{fundamentals.yearLow.toLocaleString('en-IN', { minimumFractionDigits: 2 })}</strong></span>
+          <span>52W Low: <strong className="text-white">&#8377;{fundamentals.yearLow.toLocaleString('en-IN', { minimumFractionDigits: 2 })}</strong></span>
           <span className="text-[10px] text-slate-500">{rangePercent.toFixed(1)}% of 52W range</span>
-          <span>52W High: <strong className="text-white">₹{fundamentals.yearHigh.toLocaleString('en-IN', { minimumFractionDigits: 2 })}</strong></span>
+          <span>52W High: <strong className="text-white">&#8377;{fundamentals.yearHigh.toLocaleString('en-IN', { minimumFractionDigits: 2 })}</strong></span>
         </div>
       </div>
 
@@ -85,9 +78,9 @@ export function CompanyFundamentalsCard({
         <div className="rounded-lg border border-slate-800 bg-slate-900/40 p-3 space-y-1">
           <span className="text-[11px] text-slate-400 uppercase tracking-wider block">Market Cap</span>
           <div className="text-lg font-bold text-white font-tabular">
-            ₹{marketCapLakhCr} <span className="text-xs font-normal text-slate-400">Lakh Cr</span>
+            &#8377;{marketCapLakhCr} <span className="text-xs font-normal text-slate-400">Lakh Cr</span>
           </div>
-          <span className="text-[10px] text-slate-500 block">₹{fundamentals.marketCapCr.toLocaleString('en-IN')} Cr</span>
+          <span className="text-[10px] text-slate-500 block">&#8377;{fundamentals.marketCapCr.toLocaleString('en-IN')} Cr</span>
         </div>
 
         {/* P/E Ratio */}
@@ -95,7 +88,7 @@ export function CompanyFundamentalsCard({
           <div className="flex justify-between items-center">
             <span className="text-[11px] text-slate-400 uppercase tracking-wider">P/E Ratio</span>
             <span
-              className={`rounded px-1.5 py-0.2 text-[9px] font-semibold ${
+              className={`rounded px-1.5 text-[9px] font-semibold ${
                 isPeCheaperThanSector ? 'bg-emerald-950 text-emerald-400' : 'bg-amber-950 text-amber-400'
               }`}
             >
@@ -110,13 +103,13 @@ export function CompanyFundamentalsCard({
         <div className="rounded-lg border border-slate-800 bg-slate-900/40 p-3 space-y-1">
           <span className="text-[11px] text-slate-400 uppercase tracking-wider block">Price to Book (P/B)</span>
           <div className="text-lg font-bold text-white font-tabular">{fundamentals.pbRatio.toFixed(2)}</div>
-          <span className="text-[10px] text-slate-500 block">Book Value: ₹{fundamentals.bookValue.toFixed(1)}</span>
+          <span className="text-[10px] text-slate-500 block">Book Value: &#8377;{fundamentals.bookValue.toFixed(1)}</span>
         </div>
 
         {/* EPS (TTM) */}
         <div className="rounded-lg border border-slate-800 bg-slate-900/40 p-3 space-y-1">
           <span className="text-[11px] text-slate-400 uppercase tracking-wider block">EPS (TTM)</span>
-          <div className="text-lg font-bold text-white font-tabular">₹{fundamentals.epsTtm.toFixed(2)}</div>
+          <div className="text-lg font-bold text-white font-tabular">&#8377;{fundamentals.epsTtm.toFixed(2)}</div>
           <span className="text-[10px] text-slate-500 block">Trailing 12-Month Net</span>
         </div>
 
@@ -139,7 +132,7 @@ export function CompanyFundamentalsCard({
           <div className="flex justify-between items-center">
             <span className="text-[11px] text-slate-400 uppercase tracking-wider">Debt to Equity</span>
             <span
-              className={`rounded px-1.5 py-0.2 text-[9px] font-semibold ${
+              className={`rounded px-1.5 text-[9px] font-semibold ${
                 fundamentals.debtToEquity < 0.5
                   ? 'bg-emerald-950 text-emerald-400'
                   : fundamentals.debtToEquity < 1.5
@@ -171,7 +164,7 @@ export function CompanyFundamentalsCard({
         {/* Face Value */}
         <div className="rounded-lg border border-slate-800 bg-slate-900/40 p-3 space-y-1">
           <span className="text-[11px] text-slate-400 uppercase tracking-wider block">Face Value</span>
-          <div className="text-lg font-bold text-white font-tabular">₹{fundamentals.faceValue}</div>
+          <div className="text-lg font-bold text-white font-tabular">&#8377;{fundamentals.faceValue}</div>
           <span className="text-[10px] text-slate-500 block">Nominal Par Value Per Share</span>
         </div>
       </div>
@@ -185,3 +178,4 @@ export function CompanyFundamentalsCard({
     </div>
   );
 }
+

@@ -11,6 +11,7 @@ import { StrategyLabPage } from './pages/StrategyLab';
 import { WatchlistPage } from './pages/Watchlist';
 import { AlertsPage } from './pages/Alerts';
 import { AuthPage } from './pages/Auth';
+import { NotFoundPage } from './pages/NotFound';
 
 export function App() {
   return (
@@ -26,7 +27,7 @@ export function App() {
           <Route path="/watchlist" element={<WatchlistPage />} />
           <Route path="/alerts" element={<AlertsPage />} />
           <Route path="/auth" element={<AuthPage />} />
-          <Route path="*" element={<LandingPage />} />
+          <Route path="*" element={<NotFoundPage />} />
         </Routes>
       </main>
       <Footer />
@@ -35,3 +36,4 @@ export function App() {
 }
 
 export default App;
+

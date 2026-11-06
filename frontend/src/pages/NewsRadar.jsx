@@ -10,25 +10,24 @@ import {
   HelpCircle,
   MinusCircle,
 } from 'lucide-react';
-import { NewsItem, SentimentType } from '../types/market';
 import { StatusBadge } from '../components/ui/StatusBadge';
 import { fetchApi } from '../lib/api';
 
 export function NewsRadarPage() {
-  const [news, setNews] = useState<NewsItem[]>([]);
+  const [news, setNews] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-  const [selectedSentiment, setSelectedSentiment] = useState<string>('ALL');
+  const [error, setError] = useState(null);
+  const [selectedSentiment, setSelectedSentiment] = useState('ALL');
   const [searchFilter, setSearchFilter] = useState('');
 
   const fetchNews = async () => {
     try {
       setLoading(true);
       setError(null);
-      const data = await fetchApi<NewsItem[] | { news: NewsItem[] }>('/news/');
+      const data = await fetchApi('/news/');
       const items = Array.isArray(data) ? data : (data.news || []);
       setNews(items);
-    } catch (err: unknown) {
+    } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to retrieve news stream');
     } finally {
       setLoading(false);
@@ -39,7 +38,7 @@ export function NewsRadarPage() {
     fetchNews();
   }, []);
 
-  const sentimentPill = (sentiment: SentimentType) => {
+  const sentimentPill = (sentiment) => {
     switch (sentiment) {
       case 'positive':
         return (
@@ -91,12 +90,12 @@ export function NewsRadarPage() {
           <div className="flex items-center gap-3">
             <h1 className="text-2xl font-bold tracking-tight text-white flex items-center gap-2">
               <Newspaper className="h-6 w-6 text-teal-400" />
-              <span>News & Sentiment Radar</span>
+              <span>News &amp; Sentiment Radar</span>
             </h1>
             <StatusBadge status="LIVE" size="md" />
           </div>
           <p className="text-xs text-slate-400 mt-1">
-            Grounded market news aggregation, entity mapping, and Claude sentiment classification.
+            Grounded market news aggregation, entity mapping, and AI sentiment classification.
           </p>
         </div>
 
@@ -237,3 +236,4 @@ export function NewsRadarPage() {
     </div>
   );
 }
+

@@ -1,17 +1,11 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ChevronDown } from 'lucide-react';
-import { Instrument } from '../../types/market';
 
-interface InstrumentSwitcherProps {
-  currentKey: string;
-  instruments: Instrument[];
-}
-
-export function InstrumentSwitcher({ currentKey, instruments }: InstrumentSwitcherProps) {
+export function InstrumentSwitcher({ currentKey, instruments }) {
   const navigate = useNavigate();
 
-  const handleChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+  const handleChange = (e) => {
     const selectedKey = e.target.value;
     if (selectedKey && selectedKey !== currentKey) {
       navigate(`/stocks/${encodeURIComponent(selectedKey)}`);
@@ -42,3 +36,4 @@ export function InstrumentSwitcher({ currentKey, instruments }: InstrumentSwitch
     </div>
   );
 }
+

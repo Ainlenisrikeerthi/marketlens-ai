@@ -43,7 +43,7 @@ export function Footer() {
               </li>
               <li>
                 <Link to="/stocks/NSE_EQ|INE002A01018" className="hover:text-teal-400 transition-colors">
-                  Stock Research & Indicators
+                  Stock Research &amp; Indicators
                 </Link>
               </li>
               <li>
@@ -58,14 +58,14 @@ export function Footer() {
               </li>
               <li>
                 <Link to="/watchlist" className="hover:text-teal-400 transition-colors">
-                  Watchlists & Alerts
+                  Watchlists &amp; Alerts
                 </Link>
               </li>
             </ul>
           </div>
 
           <div>
-            <h4 className="font-semibold text-slate-200 text-xs uppercase tracking-wider mb-3">Attributions & Links</h4>
+            <h4 className="font-semibold text-slate-200 text-xs uppercase tracking-wider mb-3">Attributions &amp; Links</h4>
             <ul className="space-y-2 text-slate-400 text-[11px]">
               <li>
                 <a
@@ -105,10 +105,11 @@ export function Footer() {
         </div>
 
         <div className="mt-8 border-t border-slate-800/80 pt-6 flex flex-col sm:flex-row items-center justify-between gap-4 text-slate-500 text-[11px]">
-          <p>© {new Date().getFullYear()} MarketLens AI. All rights reserved.</p>
+          <p>&copy; {new Date().getFullYear()} MarketLens AI. All rights reserved.</p>
           <p>Indian Market Session: Mon–Fri 09:15–15:30 IST</p>
         </div>
       </div>
     </footer>
   );
 }
+

@@ -11,7 +11,6 @@ import {
   ExternalLink,
   RefreshCw,
 } from 'lucide-react';
-import { StockAnalysis, Candle, Instrument } from '../types/market';
 import { StatusBadge } from '../components/ui/StatusBadge';
 import { TradingViewChart } from '../components/charts/TradingViewChart';
 import { InstrumentSwitcher } from '../components/market/InstrumentSwitcher';
@@ -19,14 +18,14 @@ import { CompanyFundamentalsCard } from '../components/stocks/CompanyFundamental
 import { fetchApi } from '../lib/api';
 
 export function StockResearchPage() {
-  const { instrument } = useParams<{ instrument: string }>();
+  const { instrument } = useParams();
   const instrumentKey = instrument || 'NSE_EQ|INE002A01018';
 
-  const [analysis, setAnalysis] = useState<StockAnalysis | null>(null);
-  const [candles, setCandles] = useState<Candle[]>([]);
-  const [allInstruments, setAllInstruments] = useState<Instrument[]>([]);
+  const [analysis, setAnalysis] = useState(null);
+  const [candles, setCandles] = useState([]);
+  const [allInstruments, setAllInstruments] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  const [error, setError] = useState(null);
 
   useEffect(() => {
     let isMounted = true;
@@ -34,9 +33,9 @@ export function StockResearchPage() {
     setError(null);
 
     Promise.all([
-      fetchApi<StockAnalysis>(`/stocks/${encodeURIComponent(instrumentKey)}/analysis/`),
-      fetchApi<{ candles: Candle[] }>(`/stocks/${encodeURIComponent(instrumentKey)}/history/?days=60`),
-      fetchApi<Instrument[]>('/instruments/search/'),
+      fetchApi(`/stocks/${encodeURIComponent(instrumentKey)}/analysis/`),
+      fetchApi(`/stocks/${encodeURIComponent(instrumentKey)}/history/?days=60`),
+      fetchApi('/instruments/search/'),
     ])
       .then(([analysisData, historyData, instrumentsData]) => {
         if (!isMounted) return;
@@ -62,7 +61,7 @@ export function StockResearchPage() {
       <div className="mx-auto max-w-7xl px-4 py-16 sm:px-6 lg:px-8">
         <div className="flex flex-col items-center justify-center min-h-[400px] gap-3">
           <RefreshCw className="h-8 w-8 text-teal-400 animate-spin" />
-          <span className="text-slate-400 text-sm">Loading stock research & indicators...</span>
+          <span className="text-slate-400 text-sm">Loading stock research &amp; indicators...</span>
         </div>
       </div>
     );
@@ -83,8 +82,8 @@ export function StockResearchPage() {
     instrumentKey: analysis.instrumentKey,
     symbol: analysis.symbol,
     name: quote.name,
-    exchange: 'NSE' as const,
-    currency: 'INR' as const,
+    exchange: 'NSE',
+    currency: 'INR',
   };
   const fundamentals = analysis.fundamentals;
   const isPositive = quote.change >= 0;
@@ -125,7 +124,7 @@ export function StockResearchPage() {
         <div className="rounded-xl border border-slate-800 bg-[#0e1424] p-4">
           <span className="text-xs text-slate-400 block mb-1">Last Traded Price</span>
           <span className="text-xl font-bold text-white font-tabular">
-            ₹{quote.lastPrice.toLocaleString('en-IN', { minimumFractionDigits: 2 })}
+            &#8377;{quote.lastPrice.toLocaleString('en-IN', { minimumFractionDigits: 2 })}
           </span>
           <div
             className={`flex items-center gap-1 text-xs font-semibold mt-1 font-tabular ${
@@ -144,7 +143,7 @@ export function StockResearchPage() {
         <div className="rounded-xl border border-slate-800 bg-[#0e1424] p-4">
           <span className="text-xs text-slate-400 block mb-1">Day High</span>
           <span className="text-lg font-bold text-white font-tabular">
-            ₹{quote.high?.toLocaleString('en-IN', { minimumFractionDigits: 2 })}
+            &#8377;{quote.high?.toLocaleString('en-IN', { minimumFractionDigits: 2 })}
           </span>
           <span className="text-[11px] text-slate-500 block mt-1">Session Peak</span>
         </div>
@@ -152,7 +151,7 @@ export function StockResearchPage() {
         <div className="rounded-xl border border-slate-800 bg-[#0e1424] p-4">
           <span className="text-xs text-slate-400 block mb-1">Day Low</span>
           <span className="text-lg font-bold text-white font-tabular">
-            ₹{quote.low?.toLocaleString('en-IN', { minimumFractionDigits: 2 })}
+            &#8377;{quote.low?.toLocaleString('en-IN', { minimumFractionDigits: 2 })}
           </span>
           <span className="text-[11px] text-slate-500 block mt-1">Session Trough</span>
         </div>
@@ -160,7 +159,7 @@ export function StockResearchPage() {
         <div className="rounded-xl border border-slate-800 bg-[#0e1424] p-4">
           <span className="text-xs text-slate-400 block mb-1">Previous Close</span>
           <span className="text-lg font-bold text-white font-tabular">
-            ₹{quote.previousClose?.toLocaleString('en-IN', { minimumFractionDigits: 2 })}
+            &#8377;{quote.previousClose?.toLocaleString('en-IN', { minimumFractionDigits: 2 })}
           </span>
           <span className="text-[11px] text-slate-500 block mt-1">Prior Session</span>
         </div>
@@ -221,11 +220,11 @@ export function StockResearchPage() {
             <div className="mt-2 space-y-1 font-tabular text-sm">
               <div className="flex justify-between">
                 <span className="text-slate-400">SMA 20:</span>
-                <span className="font-semibold text-white">₹{ind.sma20?.toFixed(2)}</span>
+                <span className="font-semibold text-white">&#8377;{ind.sma20?.toFixed(2)}</span>
               </div>
               <div className="flex justify-between">
                 <span className="text-slate-400">SMA 50:</span>
-                <span className="font-semibold text-white">₹{ind.sma50?.toFixed(2)}</span>
+                <span className="font-semibold text-white">&#8377;{ind.sma50?.toFixed(2)}</span>
               </div>
             </div>
             <div className="mt-2 text-[11px] text-teal-400">
@@ -240,11 +239,11 @@ export function StockResearchPage() {
             <div className="mt-2 space-y-1 font-tabular text-sm">
               <div className="flex justify-between">
                 <span className="text-slate-400">EMA 20:</span>
-                <span className="font-semibold text-white">₹{ind.ema20?.toFixed(2)}</span>
+                <span className="font-semibold text-white">&#8377;{ind.ema20?.toFixed(2)}</span>
               </div>
               <div className="flex justify-between">
                 <span className="text-slate-400">EMA 50:</span>
-                <span className="font-semibold text-white">₹{ind.ema50?.toFixed(2)}</span>
+                <span className="font-semibold text-white">&#8377;{ind.ema50?.toFixed(2)}</span>
               </div>
             </div>
             <div className="mt-2 text-[11px] text-teal-400">Exponential Weighted Trend</div>
@@ -310,7 +309,7 @@ export function StockResearchPage() {
                 </span>
               </h3>
               <p className="text-xs text-slate-400">
-                Generated via Claude schema contract using only displayed price, indicator, and news facts.
+                Generated via Gemini schema contract using only displayed price, indicator, and news facts.
               </p>
             </div>
           </div>
@@ -350,7 +349,7 @@ export function StockResearchPage() {
           <div className="space-y-3">
             <h4 className="text-xs font-semibold text-rose-300 uppercase tracking-wider flex items-center gap-1.5">
               <ShieldAlert className="h-3.5 w-3.5 text-rose-400" />
-              <span>Risks & Market Uncertainties</span>
+              <span>Risks &amp; Market Uncertainties</span>
             </h4>
             <ul className="space-y-2">
               {analysis.risks.map((risk, idx) => (
@@ -399,3 +398,4 @@ export function StockResearchPage() {
     </div>
   );
 }
+

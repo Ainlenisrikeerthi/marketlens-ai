@@ -66,3 +66,4 @@ def enrich_news_with_sentiment(items):
         item_copy['explanation'] = item.get('explanation') or res['explanation']
         enriched.append(item_copy)
     return enriched
+

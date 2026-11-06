@@ -14,14 +14,13 @@ import {
   Bell,
 } from 'lucide-react';
 import { supabase, isSupabaseConfigured } from '../../lib/supabase';
-import type { User as SupabaseUser } from '@supabase/supabase-js';
 
 export function Navbar() {
   const location = useLocation();
   const navigate = useNavigate();
   const pathname = location.pathname;
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  const [user, setUser] = useState<SupabaseUser | null>(null);
+  const [user, setUser] = useState(null);
   const [isSigningOut, setIsSigningOut] = useState(false);
 
   useEffect(() => {
@@ -58,7 +57,7 @@ export function Navbar() {
     { href: '/alerts', label: 'Alerts', icon: Bell },
   ];
 
-  const isActive = (path: string) => {
+  const isActive = (path) => {
     if (path.startsWith('/stocks/')) {
       return pathname.startsWith('/stocks');
     }
@@ -207,3 +206,4 @@ export function Navbar() {
     </header>
   );
 }
+

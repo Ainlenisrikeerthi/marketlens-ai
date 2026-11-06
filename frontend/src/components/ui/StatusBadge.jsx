@@ -1,13 +1,7 @@
 import React from 'react';
-import { DataStatus } from '../../types/market';
 
-interface StatusBadgeProps {
-  status: DataStatus;
-  size?: 'sm' | 'md';
-}
-
-export function StatusBadge({ status, size = 'sm' }: StatusBadgeProps) {
-  const styles: Record<DataStatus, { bg: string; dot: string; label: string }> = {
+export function StatusBadge({ status, size = 'sm' }) {
+  const styles = {
     DEMO: {
       bg: 'bg-emerald-950/40 border-emerald-600/40 text-emerald-300',
       dot: 'bg-emerald-400 animate-pulse',
@@ -48,3 +42,4 @@ export function StatusBadge({ status, size = 'sm' }: StatusBadgeProps) {
     </span>
   );
 }
+

@@ -151,3 +151,4 @@ class InMemoryPaperPortfolioManager:
 
 
 global_paper_portfolio = InMemoryPaperPortfolioManager(500000)
+

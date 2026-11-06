@@ -189,3 +189,4 @@ Follow these mandatory rules:
         'dataQualityWarnings': [] if is_ai_powered else ['AI API key not configured or offline. Research generated via deterministic mathematical engine.'],
         'status': quote.get('status', 'LIVE') if quote else 'LIVE',
     }
+

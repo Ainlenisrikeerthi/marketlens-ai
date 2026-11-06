@@ -389,3 +389,4 @@ COMPANY_FUNDAMENTALS = {
 
 def get_company_fundamentals(instrument_key):
     return COMPANY_FUNDAMENTALS.get(instrument_key)
+

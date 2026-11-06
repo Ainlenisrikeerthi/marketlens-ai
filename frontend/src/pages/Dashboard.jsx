@@ -8,31 +8,30 @@ import {
   LineChart,
   Info,
 } from 'lucide-react';
-import { MarketOverview, Quote, Candle } from '../types/market';
 import { StatusBadge } from '../components/ui/StatusBadge';
 import { MoversWidget } from '../components/market/MoversWidget';
 import { TradingViewChart } from '../components/charts/TradingViewChart';
 import { fetchApi } from '../lib/api';
 
 export function DashboardPage() {
-  const [overview, setOverview] = useState<MarketOverview | null>(null);
+  const [overview, setOverview] = useState(null);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  const [error, setError] = useState(null);
   const [searchQuery, setSearchQuery] = useState('');
-  const [selectedStockForChart, setSelectedStockForChart] = useState<Quote | null>(null);
-  const [candles, setCandles] = useState<Candle[]>([]);
+  const [selectedStockForChart, setSelectedStockForChart] = useState(null);
+  const [candles, setCandles] = useState([]);
   const [chartLoading, setChartLoading] = useState(false);
 
   const fetchOverview = async () => {
     try {
       setLoading(true);
       setError(null);
-      const data = await fetchApi<MarketOverview>('/market/overview/');
+      const data = await fetchApi('/market/overview/');
       setOverview(data);
       if (data.allTracked.length > 0 && !selectedStockForChart) {
         setSelectedStockForChart(data.allTracked[0]);
       }
-    } catch (err: unknown) {
+    } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to load market overview');
     } finally {
       setLoading(false);
@@ -48,7 +47,7 @@ export function DashboardPage() {
     const fetchHistory = async () => {
       try {
         setChartLoading(true);
-        const data = await fetchApi<{ candles: Candle[] }>(
+        const data = await fetchApi(
           `/stocks/${encodeURIComponent(selectedStockForChart.instrumentKey)}/history/`
         );
         setCandles(data.candles || []);
@@ -64,10 +63,10 @@ export function DashboardPage() {
   const filteredStocks = React.useMemo(() => {
     if (!overview) return [];
     return overview.allTracked.filter((stock) => {
-      const matchesSearch =
+      return (
         stock.symbol.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        stock.name.toLowerCase().includes(searchQuery.toLowerCase());
-      return matchesSearch;
+        stock.name.toLowerCase().includes(searchQuery.toLowerCase())
+      );
     });
   }, [overview, searchQuery]);
 
@@ -109,7 +108,7 @@ export function DashboardPage() {
             <StatusBadge status={overview.status} size="md" />
           </div>
           <p className="text-xs text-slate-400 mt-1 flex items-center gap-1.5">
-            <span>Tracking 20 Curated Equities across NSE & BSE</span>
+            <span>Tracking 20 Curated Equities across NSE &amp; BSE</span>
             <span>•</span>
             <span className="font-mono">Observed as of {overview.asOf}</span>
           </p>
@@ -141,7 +140,7 @@ export function DashboardPage() {
               </div>
               <div className="mt-3 flex items-baseline justify-between">
                 <span className="text-2xl font-bold text-white font-tabular">
-                  ₹{idx.lastPrice.toLocaleString('en-IN', { minimumFractionDigits: 2 })}
+                  &#8377;{idx.lastPrice.toLocaleString('en-IN', { minimumFractionDigits: 2 })}
                 </span>
                 <span
                   className={`flex items-center gap-1 text-xs font-semibold font-tabular px-2 py-0.5 rounded ${
@@ -175,7 +174,7 @@ export function DashboardPage() {
               </div>
               <div className="mt-1 flex items-center gap-3 text-xs font-tabular">
                 <span className="text-white font-bold">
-                  ₹{selectedStockForChart.lastPrice.toLocaleString('en-IN', { minimumFractionDigits: 2 })}
+                  &#8377;{selectedStockForChart.lastPrice.toLocaleString('en-IN', { minimumFractionDigits: 2 })}
                 </span>
                 <span
                   className={selectedStockForChart.change >= 0 ? 'text-emerald-400' : 'text-rose-400'}
@@ -192,7 +191,7 @@ export function DashboardPage() {
               className="inline-flex items-center gap-1.5 rounded-lg bg-teal-500/10 border border-teal-500/30 px-3 py-1.5 text-xs font-medium text-teal-300 hover:bg-teal-500/20 transition self-start sm:self-auto"
             >
               <LineChart className="h-3.5 w-3.5" />
-              <span>Full AI Research & Indicators</span>
+              <span>Full AI Research &amp; Indicators</span>
             </Link>
           </div>
 
@@ -271,7 +270,7 @@ export function DashboardPage() {
                         </div>
                       </td>
                       <td className="py-3 px-4 text-right font-medium font-tabular text-white">
-                        ₹{stock.lastPrice.toLocaleString('en-IN', { minimumFractionDigits: 2 })}
+                        &#8377;{stock.lastPrice.toLocaleString('en-IN', { minimumFractionDigits: 2 })}
                       </td>
                       <td className="py-3 px-4 text-right font-medium font-tabular">
                         <span
@@ -321,7 +320,7 @@ export function DashboardPage() {
               <span>Real-Time Market Intelligence</span>
             </h4>
             <p className="leading-relaxed">
-              Equities stream live pricing, indicator updates, and algorithmic movers across NSE & BSE. Configure real-time price alerts to receive instant notifications when thresholds are breached.
+              Equities stream live pricing, indicator updates, and algorithmic movers across NSE &amp; BSE. Configure real-time price alerts to receive instant notifications when thresholds are breached.
             </p>
           </div>
         </div>
@@ -329,3 +328,4 @@ export function DashboardPage() {
     </div>
   );
 }
+

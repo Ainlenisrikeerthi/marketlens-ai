@@ -1,39 +1,24 @@
 import React, { useEffect, useRef, useState, useMemo } from 'react';
-import {
-  createChart,
-  ColorType,
-  IChartApi,
-  ISeriesApi,
-  CandlestickData,
-  LineData,
-  Time,
-} from 'lightweight-charts';
-import { Candle } from '../../types/market';
+import { createChart, ColorType } from 'lightweight-charts';
 
-interface TradingViewChartProps {
-  candles: Candle[];
-  symbol?: string;
-  height?: number;
-}
-
-export function TradingViewChart({ candles, symbol = 'STOCK', height = 420 }: TradingViewChartProps) {
-  const chartContainerRef = useRef<HTMLDivElement>(null);
-  const chartRef = useRef<IChartApi | null>(null);
-  const candleSeriesRef = useRef<ISeriesApi<'Candlestick'> | null>(null);
-  const sma20SeriesRef = useRef<ISeriesApi<'Line'> | null>(null);
-  const sma50SeriesRef = useRef<ISeriesApi<'Line'> | null>(null);
+/**
+ * TradingView lightweight-charts v4 candlestick chart component.
+ * Uses chart.addCandlestickSeries() — the v4 API (not v5's addSeries()).
+ *
+ * @param {{ candles: Array, symbol?: string, height?: number }} props
+ */
+export function TradingViewChart({ candles, symbol = 'STOCK', height = 420 }) {
+  const chartContainerRef = useRef(null);
+  const chartRef = useRef(null);
+  const candleSeriesRef = useRef(null);
+  const sma20SeriesRef = useRef(null);
+  const sma50SeriesRef = useRef(null);
 
   const [mounted, setMounted] = useState(false);
   const [showSMA20, setShowSMA20] = useState(true);
   const [showSMA50, setShowSMA50] = useState(false);
-  const [timeframe, setTimeframe] = useState<'1M' | '3M' | 'ALL'>('ALL');
-  const [activeLegend, setActiveLegend] = useState<{
-    time: string;
-    open: number;
-    high: number;
-    low: number;
-    close: number;
-  } | null>(null);
+  const [timeframe, setTimeframe] = useState('ALL');
+  const [activeLegend, setActiveLegend] = useState(null);
 
   // Filter candles based on timeframe
   const filteredCandles = useMemo(() => {
@@ -105,8 +90,8 @@ export function TradingViewChart({ candles, symbol = 'STOCK', height = 420 }: Tr
       wickDownColor: '#f43f5e',
     });
 
-    const formattedCandles: CandlestickData<Time>[] = filteredCandles.map((c) => ({
-      time: c.timestamp as Time,
+    const formattedCandles = filteredCandles.map((c) => ({
+      time: c.timestamp,
       open: c.open,
       high: c.high,
       low: c.low,
@@ -116,7 +101,7 @@ export function TradingViewChart({ candles, symbol = 'STOCK', height = 420 }: Tr
     candleSeries.setData(formattedCandles);
 
     // SMA 20 Overlay Series
-    let sma20Series: ISeriesApi<'Line'> | null = null;
+    let sma20Series = null;
     if (showSMA20) {
       sma20Series = chart.addLineSeries({
         color: '#f59e0b',
@@ -124,12 +109,12 @@ export function TradingViewChart({ candles, symbol = 'STOCK', height = 420 }: Tr
         title: 'SMA 20',
       });
 
-      const sma20Data: LineData<Time>[] = [];
+      const sma20Data = [];
       for (let i = 19; i < filteredCandles.length; i++) {
         const slice = filteredCandles.slice(i - 19, i + 1);
         const sum = slice.reduce((acc, c) => acc + c.close, 0);
         sma20Data.push({
-          time: filteredCandles[i].timestamp as Time,
+          time: filteredCandles[i].timestamp,
           value: Number((sum / 20).toFixed(2)),
         });
       }
@@ -137,7 +122,7 @@ export function TradingViewChart({ candles, symbol = 'STOCK', height = 420 }: Tr
     }
 
     // SMA 50 Overlay Series
-    let sma50Series: ISeriesApi<'Line'> | null = null;
+    let sma50Series = null;
     if (showSMA50) {
       sma50Series = chart.addLineSeries({
         color: '#38bdf8',
@@ -145,12 +130,12 @@ export function TradingViewChart({ candles, symbol = 'STOCK', height = 420 }: Tr
         title: 'SMA 50',
       });
 
-      const sma50Data: LineData<Time>[] = [];
+      const sma50Data = [];
       for (let i = 49; i < filteredCandles.length; i++) {
         const slice = filteredCandles.slice(i - 49, i + 1);
         const sum = slice.reduce((acc, c) => acc + c.close, 0);
         sma50Data.push({
-          time: filteredCandles[i].timestamp as Time,
+          time: filteredCandles[i].timestamp,
           value: Number((sum / 50).toFixed(2)),
         });
       }
@@ -162,7 +147,7 @@ export function TradingViewChart({ candles, symbol = 'STOCK', height = 420 }: Tr
         setActiveLegend(null);
         return;
       }
-      const data = param.seriesData.get(candleSeries) as CandlestickData<Time> | undefined;
+      const data = param.seriesData.get(candleSeries);
       if (data) {
         setActiveLegend({
           time: String(param.time),
@@ -220,6 +205,8 @@ export function TradingViewChart({ candles, symbol = 'STOCK', height = 420 }: Tr
     close: latest.close,
   } : null);
 
+  const timeframes = ['1M', '3M', 'ALL'];
+
   return (
     <div className="relative w-full rounded-xl overflow-hidden border border-slate-800 bg-[#0e1424] shadow-lg">
       {/* Top Toolbar & Legend */}
@@ -229,7 +216,7 @@ export function TradingViewChart({ candles, symbol = 'STOCK', height = 420 }: Tr
           
           {/* Timeframe switchers */}
           <div className="flex items-center rounded-lg bg-slate-800/80 p-0.5 border border-slate-700/60">
-            {(['1M', '3M', 'ALL'] as const).map((tf) => (
+            {timeframes.map((tf) => (
               <button
                 key={tf}
                 onClick={() => setTimeframe(tf)}
@@ -274,13 +261,13 @@ export function TradingViewChart({ candles, symbol = 'STOCK', height = 420 }: Tr
 
         {/* OHLC Bar Legend */}
         {displayLegend && (
-          <div className="flex flex-wrap items-center gap-3 font-mono text-[11px] text-slate-400 font-tabular">
+          <div className="flex flex-wrap items-center gap-3 font-mono text-[11px] text-slate-400">
             <span>Date: <span className="text-slate-200">{displayLegend.time}</span></span>
-            <span>O: <span className="text-white">₹{displayLegend.open.toFixed(2)}</span></span>
-            <span>H: <span className="text-white">₹{displayLegend.high.toFixed(2)}</span></span>
-            <span>L: <span className="text-white">₹{displayLegend.low.toFixed(2)}</span></span>
+            <span>O: <span className="text-white">&#8377;{displayLegend.open.toFixed(2)}</span></span>
+            <span>H: <span className="text-white">&#8377;{displayLegend.high.toFixed(2)}</span></span>
+            <span>L: <span className="text-white">&#8377;{displayLegend.low.toFixed(2)}</span></span>
             <span>C: <span className={displayLegend.close >= displayLegend.open ? 'text-emerald-400' : 'text-rose-400'}>
-              ₹{displayLegend.close.toFixed(2)}
+              &#8377;{displayLegend.close.toFixed(2)}
             </span></span>
           </div>
         )}
@@ -291,3 +278,4 @@ export function TradingViewChart({ candles, symbol = 'STOCK', height = 420 }: Tr
     </div>
   );
 }
+
