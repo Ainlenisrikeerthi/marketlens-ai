@@ -20,14 +20,35 @@ MarketLens AI is a professional, portfolio-grade web application engineered for 
 
 ## 📦 Technology Stack
 
-- **Framework:** Next.js 16 (App Router, React 19, TypeScript)
-- **Styling:** Tailwind CSS (Dark navy/charcoal fintech theme, accessible emerald/rose signed figures)
-- **Charting:** TradingView Lightweight Charts™ v5 (Candlestick series with responsive observer)
-- **Validation:** Zod schemas for API input validation and contract enforcement
-- **Rate Limiting:** Sliding-window in-memory rate limiter (120 req/min per IP)
-- **Caching:** Multi-tier server memory cache with TTL (10s live, 60s market closed, 1h candles, 5m news)
-- **Testing:** Vitest test suite (24 tests across 4 suites)
-- **Market Data Providers:**
+- **Backend:** Python 3.12 + Django 5 / 6 + Django REST Framework (DRF)
+- **Frontend:** React 18 + Vite 6 + TypeScript + Tailwind CSS
+- **Database & Auth:** Supabase (Auth with Row Level Security, Watchlists & Alerts storage)
+- **Styling:** Tailwind CSS (Dark navy/charcoal fintech theme `#090d16`, emerald `#10b981` gains, rose `#f43f5e` losses, teal `#14b8a6` accents)
+- **Charting:** TradingView Lightweight Charts™ (Interactive Candlestick series with SMA 20/50 overlays)
+- **AI Research:** Claude 3.5 Sonnet (with deterministic algorithmic fallback)
+- **Market Feed:** Real-time Indian equity pricing & historical candles across 20 curated NSE/BSE stocks & 3 benchmark indices
+
+---
+
+## 🚀 Quick Start — Running the Project
+
+### 1. Start Django Backend (Port 8000)
+```powershell
+# From the project root:
+cd backend
+python -m pip install -r requirements.txt
+python manage.py runserver 8000
+```
+API endpoints will be live at `http://localhost:8000/api/`.
+
+### 2. Start React Frontend (Port 5173)
+```powershell
+# Open a new terminal from project root:
+cd frontend
+npm install
+npm run dev
+```
+Open `http://localhost:5173` in your browser. All `/api` requests are automatically proxied to the Django backend.
   - `UpstoxProvider`: Authorized Upstox Analytics Token API (v3 Market Quotes, v2 Historical Candles, v2 Equity News)
   - `DemoProvider`: Zero-config deterministic synthetic fixture generator with automatic fallback
 
